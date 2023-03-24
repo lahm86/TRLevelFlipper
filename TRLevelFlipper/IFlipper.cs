@@ -5,7 +5,7 @@ namespace TRLevelFlipper;
 public interface IFlipper
 {
     FlipType FlipType { get; }
-    void Flip(TRLevel level);
-    void Flip(TR2Level level);
-    void Flip(TR3Level level);
+    void Flip(string levelName, TRLevel level);
+    void Flip(string levelName, TR2Level level);
+    void Flip(string levelName, TR3Level level);
 }

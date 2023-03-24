@@ -13,7 +13,7 @@ public class ZFlipper : IFlipper
 
     private int _worldDepth, _zAdjustment;
 
-    public void Flip(TRLevel level)
+    public void Flip(string levelName, TRLevel level)
     {
         CalculateWorldDepth(level);
 
@@ -28,7 +28,7 @@ public class ZFlipper : IFlipper
         MirrorTextures(level);
     }
 
-    public void Flip(TR2Level level)
+    public void Flip(string levelName, TR2Level level)
     {
         CalculateWorldWidth(level);
 
@@ -43,7 +43,7 @@ public class ZFlipper : IFlipper
         MirrorTextures(level);
     }
 
-    public void Flip(TR3Level level)
+    public void Flip(string levelName, TR3Level level)
     {
         CalculateWorldWidth(level);
 

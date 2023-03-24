@@ -78,7 +78,7 @@ class Program
 
         TRLevel level = reader.ReadLevel(levelFile);
 
-        flipper.Flip(level);
+        flipper.Flip(Path.GetFileName(levelFile).ToUpper(), level);
         options.Apply(level);
 
         Write(levelFile, flipper, path => writer.WriteLevelToFile(level, path));
@@ -91,7 +91,7 @@ class Program
 
         TR2Level level = reader.ReadLevel(levelFile);
 
-        flipper.Flip(level);
+        flipper.Flip(Path.GetFileName(levelFile).ToUpper(), level);
         options.Apply(level);
 
         Write(levelFile, flipper, path => writer.WriteLevelToFile(level, path));
@@ -104,7 +104,7 @@ class Program
 
         TR3Level level = reader.ReadLevel(levelFile);
 
-        flipper.Flip(level);
+        flipper.Flip(Path.GetFileName(levelFile).ToUpper(), level);
         options.Apply(level);
 
         Write(levelFile, flipper, path => writer.WriteLevelToFile(level, path));
