@@ -14,9 +14,9 @@ public class YFlipper : IFlipper
 
     private sbyte _yClickAdjustment;
 
-    public void Flip(TRLevel level)
+    public void Flip(string levelName, TRLevel level)
     {
-        CalculateYAdjustment(level.Rooms.Select(r => r.Info));
+        CalculateYAdjustment(levelName, level.Rooms.Select(r => r.Info));
 
         MirrorFloorData(level);
         MirrorRooms(level);
@@ -31,9 +31,9 @@ public class YFlipper : IFlipper
         MirrorTextures(level);
     }
 
-    public void Flip(TR2Level level)
+    public void Flip(string levelName, TR2Level level)
     {
-        CalculateYAdjustment(level.Rooms.Select(r => r.Info));
+        CalculateYAdjustment(levelName, level.Rooms.Select(r => r.Info));
 
         MirrorFloorData(level);
         MirrorRooms(level);
@@ -48,9 +48,9 @@ public class YFlipper : IFlipper
         MirrorTextures(level);
     }
 
-    public void Flip(TR3Level level)
+    public void Flip(string levelName, TR3Level level)
     {
-        CalculateYAdjustment(level.Rooms.Select(r => r.Info));
+        CalculateYAdjustment(levelName, level.Rooms.Select(r => r.Info));
 
         MirrorFloorData(level);
         MirrorRooms(level);
@@ -65,7 +65,7 @@ public class YFlipper : IFlipper
         MirrorTextures(level);
     }
 
-    private void CalculateYAdjustment(IEnumerable<TRRoomInfo> roomInfos)
+    private void CalculateYAdjustment(string levelName, IEnumerable<TRRoomInfo> roomInfos)
     {
         int minY = int.MaxValue;
         foreach (TRRoomInfo info in roomInfos)
@@ -74,6 +74,21 @@ public class YFlipper : IFlipper
         }
 
         _yClickAdjustment = (sbyte)(minY == short.MinValue ? 1 : 0);
+
+        // This works around the NoFloor entries in the script, although ideally it should be
+        // changed there rather than shifting the world.
+        switch (levelName)
+        {
+            case TR2LevelNames.FLOATER:
+                _yClickAdjustment = Math.Max(_yClickAdjustment, (sbyte)32);
+                break;
+            case TR3LevelNames.THAMES:
+                _yClickAdjustment = Math.Max(_yClickAdjustment, (sbyte)120);
+                break;
+            case TR3LevelNames.CITY:
+                _yClickAdjustment = Math.Max(_yClickAdjustment, (sbyte)30);
+                break;
+        }
     }
 
     private int FlipWorldY(int y)
