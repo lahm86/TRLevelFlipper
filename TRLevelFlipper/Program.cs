@@ -1,4 +1,5 @@
 ﻿using TRLevelReader;
+using TRLevelReader.Helpers;
 using TRLevelReader.Model;
 
 namespace TRLevelFlipper;
@@ -43,7 +44,16 @@ class Program
             if (arg.EndsWith("DRAIN"))
                 opts.Drain = true;
             if (arg.EndsWith("DOORS"))
-                opts.OpenDoors = true;
+                opts.RemoveDoors = true;
+            if (arg.EndsWith("PUSHBLOCKS"))
+                opts.RemovePushblocks = true;
+            if (arg.EndsWith("TILES"))
+                opts.RemoveTiles = true;
+            if (arg.EndsWith("EXTRAS") && i < args.Length - 1)
+            {
+                string[] types = args[i + 1].Split(',', StringSplitOptions.RemoveEmptyEntries);
+                opts.ExtraRemovals = types.Select(a => int.Parse(a)).ToList();
+            }
         }
 
         uint version = DetectVersion(args[0]);
@@ -67,8 +77,20 @@ class Program
 
     static uint DetectVersion(string path)
     {
-        using BinaryReader reader = new(File.Open(path, FileMode.Open));
-        return reader.ReadUInt32();
+        switch (path.ToUpper())
+        {
+            case "TR1":
+                return TR1;
+            case "TR2":
+                return TR2;
+            case "TR3":
+                return TR3a;
+            default:
+                {
+                    using BinaryReader reader = new(File.Open(path, FileMode.Open));
+                    return reader.ReadUInt32();
+                }
+        }
     }
 
     static void FlipTR1(string levelFile, IFlipper flipper, PostFlipOptions options)
@@ -76,12 +98,29 @@ class Program
         TR1LevelReader reader = new();
         TR1LevelWriter writer = new();
 
-        TRLevel level = reader.ReadLevel(levelFile);
+        List<string> levels = new();
+        if (levelFile.ToLower().Equals("tr1"))
+        {
+            levels.AddRange(TRLevelNames.AsOrderedList);
+        }
+        else
+        {
+            levels.Add(levelFile);
+        }
 
-        flipper.Flip(Path.GetFileName(levelFile).ToUpper(), level);
-        options.Apply(level);
+        foreach (string lvl in levels)
+        {
+            if (!File.Exists(lvl))
+                continue;
 
-        Write(levelFile, flipper, path => writer.WriteLevelToFile(level, path));
+            Console.WriteLine($"Flipping {Path.GetFileName(lvl)}");
+            TRLevel level = reader.ReadLevel(lvl);
+
+            flipper.Flip(Path.GetFileName(lvl).ToUpper(), level);
+            options.Apply(level);
+
+            Write(lvl, flipper, path => writer.WriteLevelToFile(level, path));
+        }
     }
 
     static void FlipTR2(string levelFile, IFlipper flipper, PostFlipOptions options)
@@ -89,12 +128,29 @@ class Program
         TR2LevelReader reader = new();
         TR2LevelWriter writer = new();
 
-        TR2Level level = reader.ReadLevel(levelFile);
+        List<string> levels = new();
+        if (levelFile.ToLower().Equals("tr2"))
+        {
+            levels.AddRange(TR2LevelNames.AsOrderedList);
+        }
+        else
+        {
+            levels.Add(levelFile);
+        }
 
-        flipper.Flip(Path.GetFileName(levelFile).ToUpper(), level);
-        options.Apply(level);
+        foreach (string lvl in levels)
+        {
+            if (!File.Exists(lvl))
+                continue;
 
-        Write(levelFile, flipper, path => writer.WriteLevelToFile(level, path));
+            Console.WriteLine($"Flipping {Path.GetFileName(lvl)}");
+            TR2Level level = reader.ReadLevel(lvl);
+
+            flipper.Flip(Path.GetFileName(lvl).ToUpper(), level);
+            options.Apply(level);
+
+            Write(lvl, flipper, path => writer.WriteLevelToFile(level, path));
+        }
     }
 
     static void FlipTR3(string levelFile, IFlipper flipper, PostFlipOptions options)
@@ -102,12 +158,29 @@ class Program
         TR3LevelReader reader = new();
         TR3LevelWriter writer = new();
 
-        TR3Level level = reader.ReadLevel(levelFile);
+        List<string> levels = new();
+        if (levelFile.ToLower().Equals("tr3"))
+        {
+            levels.AddRange(TR3LevelNames.AsOrderedList);
+        }
+        else
+        {
+            levels.Add(levelFile);
+        }
 
-        flipper.Flip(Path.GetFileName(levelFile).ToUpper(), level);
-        options.Apply(level);
+        foreach (string lvl in levels)
+        {
+            if (!File.Exists(lvl))
+                continue;
 
-        Write(levelFile, flipper, path => writer.WriteLevelToFile(level, path));
+            Console.WriteLine($"Flipping {Path.GetFileName(lvl)}");
+            TR3Level level = reader.ReadLevel(lvl);
+
+            flipper.Flip(Path.GetFileName(lvl).ToUpper(), level);
+            options.Apply(level);
+
+            Write(lvl, flipper, path => writer.WriteLevelToFile(level, path));
+        }
     }
 
     static void Write(string levelFile, IFlipper flipper, Action<string> writeAction)
@@ -121,9 +194,12 @@ class Program
     {
         Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("Usage: TRLevelFlipper LEVEL.PHD|LEVEL.TR2 X|Y|Z [ -drain | -doors ]");
+        Console.WriteLine("Usage: TRLevelFlipper LEVEL.PHD|LEVEL.TR2|TR1|TR2|TR3 X|Y|Z [ -drain | -doors | -pushblocks | -tiles | -extras 1,2,3 ]");
         Console.WriteLine("-drain : empty water from all rooms");
-        Console.WriteLine("-doors : open all doors");
+        Console.WriteLine("-doors : remove all doors and pushblocks");
+        Console.WriteLine("-pushblocks : remove all pushblocks");
+        Console.WriteLine("-tiles : remove all breakable tiles");
+        Console.WriteLine("-extras : comma-separated type ID list - extra item types to be removed");
         Console.WriteLine();
         Console.WriteLine("Examples");
         Console.WriteLine("   Flip Caves about the X axis");
@@ -131,6 +207,9 @@ class Program
         Console.WriteLine();
         Console.WriteLine("   Flip Great Wall about the Z axis and open all doors");
         Console.WriteLine("   TRLevelFlipper WALL.TR2 Z -doors");
+        Console.WriteLine();
+        Console.WriteLine("   Flip every TR2 level about the Y axis and open all doors");
+        Console.WriteLine("   TRLevelFlipper TR2 Y -doors");
         Console.WriteLine();
         Console.WriteLine("   Flip Jungle about the Y axis, drain all rooms and open all doors");
         Console.WriteLine("   TRLevelFlipper JUNGLE.TR2 Y -drain -doors");

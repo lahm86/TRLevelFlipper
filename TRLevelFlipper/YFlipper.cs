@@ -810,7 +810,6 @@ public class YFlipper : IFlipper
         {
             case TREntities.DartEmitter:
             case TREntities.WallSwitch:
-            case TREntities.UnderwaterSwitch:
             case TREntities.CameraTarget_N:
             case TREntities.Lara:
             case TREntities.SavegameCrystal_P:
@@ -896,7 +895,8 @@ public class YFlipper : IFlipper
             return;
         }
 
-        if (type == TR2Entities.Lara || TR2EntityUtilities.IsAnyPickupType(type))
+        if (type == TR2Entities.Lara || TR2EntityUtilities.IsAnyPickupType(type) || type == TR2Entities.TeethSpikesOrGlassShards || TR2EntityUtilities.IsPushblockType(type)
+            || type == TR2Entities.RollingSpindle)
         {
             FDControl floorData = new();
             floorData.ParseFromLevel(level);
@@ -935,7 +935,7 @@ public class YFlipper : IFlipper
             case TR2Entities.WallSwitch:
             case TR2Entities.SmallWallSwitch:
             case TR2Entities.PushButtonSwitch:
-            case TR2Entities.UnderwaterSwitch:
+            //case TR2Entities.UnderwaterSwitch:
             case TR2Entities.CameraTarget_N:
             case TR2Entities.FallingBlock:
             case TR2Entities.BreakableWindow1:
@@ -963,13 +963,7 @@ public class YFlipper : IFlipper
                 break;
 
             case TR2Entities.SpikyWall:
-                switch (entity.Angle)
-                {
-                    case TRConsts.South:
-                    case TRConsts.North:
-                        entity.Y += 2 * TRConsts.SectorSize;
-                        break;
-                }
+                entity.Y += 2 * TRConsts.SectorSize;
                 break;
             case TR2Entities.Gong:
                 entity.Y += 3 * TRConsts.SectorSize;
